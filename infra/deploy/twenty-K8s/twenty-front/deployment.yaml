@@ -1,0 +1,50 @@
+apiVersion: apps/v1
+kind: Deployment 
+metadata: 
+  name: twenty-front-deployment
+  labels:
+    app: twenty-front 
+    namespace: twenty 
+spec:
+  replicas: 3
+  selector:
+    matchLabels:
+      app: twenty-front
+  template: 
+    metadata:
+      labels:
+        app: twenty-front
+    spec:
+      containers:
+        - name: twenty-front
+          image: twentycrm/twenty-front:latest
+          imagePullPolicy: IfNotPresent
+          resources:
+            requests:
+              memory: "250Mi"
+              cpu: "200m"
+            limits:
+              memory: "300Mi"
+              cpu: "250m" 
+          ports:
+          - name: twenty-front-port
+            containerPort: 3000 
+          livenessProbe:
+            httpGet:
+              path: /
+              port: twenty-front-port
+            initialDelaySeconds: 300
+            periodSeconds: 10
+            timeoutSeconds: 5
+          readinessProbe:
+            httpGet:
+              path: /
+              port: twenty-front-port
+            initialDelaySeconds: 30
+            periodSeconds: 10
+            timeoutSeconds: 5
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxSurge: 30%
+      maxUnavailable: 30%

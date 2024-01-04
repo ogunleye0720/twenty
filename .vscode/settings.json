@@ -38,4 +38,9 @@
   "cSpell.words": [
     "twentyhq"
   ],
+  "[javascript][typescript][typescriptreact]": {
+    "editor.codeActionsOnSave": {
+      "source.fixAll.eslint": "explicit"
+    }
+  },
 }
