@@ -1,0 +1,33 @@
+{
+  "name": "twenty",
+  "version": "0.2.1",
+  "packageManager": "yarn@4.0.2",
+  "engines": {
+    "node": "^18.16.0",
+    "npm": "please-use-yarn",
+    "yarn": ">=4.0.2"
+  },
+  "license": "AGPL-3.0",
+  "workspaces": {
+    "packages": [
+      "packages/twenty-front",
+      "packages/twenty-docs",
+      "packages/twenty-server",
+      "packages/twenty-utils",
+      "packages/twenty-zapier",
+      "packages/twenty-website",
+      "tools/eslint-rules"
+    ]
+  },
+  "dependencies": {
+    "patch-package": "^8.0.0",
+    "tslib": "^2.3.0"
+  },
+  "devDependencies": {
+    "@nx/eslint": "17.2.7",
+    "@nx/eslint-plugin": "17.2.7",
+    "@nx/jest": "17.2.7",
+    "@nx/js": "17.2.7",
+    "nx": "^17.2.8"
+  }
+}

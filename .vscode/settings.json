@@ -1,29 +1,29 @@
 {
   "editor.formatOnSave": false,
+  "files.eol": "auto",
   "[typescript]": {
     "editor.formatOnSave": false,
     "editor.codeActionsOnSave": {
       "source.fixAll.eslint": true,
+      "source.addMissingImports": "always"
     }
   },
   "[javascript]": {
     "editor.formatOnSave": false,
     "editor.codeActionsOnSave": {
       "source.fixAll.eslint": true,
+      "source.addMissingImports": "always"
     }
   },
   "[typescriptreact]": {
     "editor.formatOnSave": false,
     "editor.codeActionsOnSave": {
       "source.fixAll.eslint": true,
+      "source.addMissingImports": "always"
     }
   },
   "[json]": {
     "editor.formatOnSave": true
-  },
-  "[prisma]": {
-    "editor.formatOnSave": true,
-    "editor.defaultFormatter": "Prisma.prisma"
   },
   "javascript.format.enable": false,
   "typescript.format.enable": false,
@@ -38,9 +38,23 @@
   "cSpell.words": [
     "twentyhq"
   ],
+<<<<<<< HEAD
   "[javascript][typescript][typescriptreact]": {
     "editor.codeActionsOnSave": {
       "source.fixAll.eslint": "explicit"
     }
   },
 }
+=======
+  "typescript.preferences.importModuleSpecifier": "non-relative",
+  "[javascript][typescript][typescriptreact]": {
+    "editor.codeActionsOnSave": {
+      "source.fixAll.eslint": "explicit",
+      "source.addMissingImports": "always"
+    }
+  },
+  "search.exclude": {
+    "**/.yarn": true,
+  }
+}
+>>>>>>> c15e138d72ee9084ab8935fa05bc1f37218f5a74

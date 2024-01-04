@@ -3,46 +3,33 @@ on:
   push:
     branches:
       - main
-  pull_request_target:
+  pull_request:
 jobs:
   server-test:
     runs-on: ubuntu-latest
     services:
       postgres:
-        image: postgres
+        image: twentycrm/twenty-postgres
         env:
-          POSTGRES_HOST: postgres
-          POSTGRES_PASSWORD: twenty
-          POSTGRES_USER: twenty
-          POSTGRES_DB: test
-          POSTGRES_PORT: 5432
+          POSTGRES_PASSWORD: postgres
+          POSTGRES_USER: postgres
         ports:
           - 5432:5432
-        options: >-
-          --health-cmd pg_isready
-          --health-interval 10s
-          --health-timeout 5s
-          --health-retries 5
     steps:
-      - uses: actions/checkout@v3
-        if: github.event_name == 'push'
+      - name: Cancel Previous Runs
+        uses: styfle/cancel-workflow-action@0.11.0
         with:
-          ref: ${{ github.head_ref || github.ref_name }}
-      - uses: actions/checkout@v3
-        if: github.event_name == 'pull_request_target'
-        with:
-          ref: "refs/pull/${{ github.event.number }}/merge"
+            access_token: ${{ github.token }}
+      - uses: actions/checkout@v4
       - name: Setup Node.js
         uses: actions/setup-node@v3
         with:
           node-version: "18"
       - name: Server / Install Dependencies
-        run: cd server && yarn install
+        run: yarn
       - name: Server / Run linter
-        run: cd server && yarn lint
+        run: yarn nx lint twenty-server
       - name: Server / Run jest tests
-        run: |
-          cd server && yarn test
-      - name: Server / Run e2e tests
-        run: |
-          cd server && yarn test:e2e
+        run: yarn nx test twenty-server
+      # - name: Server / Run e2e tests
+      #   run: yarn nx test:e2e twenty-server

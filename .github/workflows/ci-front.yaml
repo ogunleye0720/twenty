@@ -3,42 +3,173 @@ on:
   push:
     branches:
       - main
-  pull_request_target:
+  pull_request:
 jobs:
-  front-test:
-    runs-on: ubuntu-latest
+  front-yarn-install:
+    runs-on: ci-8-cores
     env:
       REACT_APP_SERVER_BASE_URL: http://localhost:3000
     steps:
-      - uses: actions/checkout@v3
-        if: github.event_name == 'push'
+      - name: Cancel Previous Runs
+        uses: styfle/cancel-workflow-action@0.11.0
         with:
-          ref: ${{ github.head_ref || github.ref_name }}
-      - uses: actions/checkout@v3
-        if: github.event_name == 'pull_request_target'
+            access_token: ${{ github.token }}
+      - uses: actions/checkout@v4
+      - name: Setup Node.js
+        uses: actions/setup-node@v3
         with:
-          ref: "refs/pull/${{ github.event.number }}/merge"
+          node-version: "18"
+      - name: Cache front node modules
+        uses: actions/cache@v3
+        with:
+          path: packages/twenty-front/node_modules
+          key: front-node_modules-${{hashFiles('yarn.lock')}}
+          restore-keys: front-node_modules-
+      - name: Cache root node modules
+        uses: actions/cache@v3
+        with:
+          path: node_modules
+          key: root-node_modules-${{hashFiles('yarn.lock')}}
+          restore-keys: root-node_modules-
+      - name: Front / Install Dependencies
+        run: yarn
+  front-pages-sb-test:
+    needs: front-yarn-install
+    runs-on: ci-8-cores
+    env:
+      REACT_APP_SERVER_BASE_URL: http://localhost:3000
+    steps:
+      - name: Cancel Previous Runs
+        uses: styfle/cancel-workflow-action@0.11.0
+        with:
+            access_token: ${{ github.token }}
+      - uses: actions/checkout@v4
       - name: Setup Node.js
         uses: actions/setup-node@v3
         with:
           node-version: "18"
       - name: Front / Write .env
         run: |
-          cd front
+          cd packages/twenty-front
           cp .env.example .env
-      - name: Front / Install Dependencies
-        run: cd front && yarn
-      - name: Front / Install Playwright
-        run: cd front && npx playwright install --with-deps
-      - name: Front / Run linter
-        run: cd front && yarn lint
-      - name: Front / Build Storybook
-        run: cd front && yarn storybook:build --quiet
-      - name: Front / Run storybook tests
+      - name: Cache front node modules
+        uses: actions/cache@v3
+        with:
+          path: packages/twenty-front/node_modules
+          key: front-node_modules-${{hashFiles('yarn.lock')}}
+          restore-keys: front-node_modules-
+      - name: Cache root node modules
+        uses: actions/cache@v3
+        with:
+          path: node_modules
+          key: root-node_modules-${{hashFiles('yarn.lock')}}
+          restore-keys: root-node_modules-
+      - name: Install Playwright
+        run: cd packages/twenty-front && npx playwright install
+      - name: Build Storybook
+        run: yarn nx storybook:pages:build --quiet twenty-front
+      - name: Run storybook tests
         run: |
-          cd front && npx concurrently -k -s first -n "SB,TEST" -c "magenta,blue" \
+          cd packages/twenty-front && npx concurrently -k -s first -n "SB,TEST" -c "magenta,blue" \
             "npx http-server storybook-static --silent --port 6006" \
-            "yarn storybook:coverage"
-      - name: Front / Run jest tests
+            "yarn storybook:pages:coverage"
+  front-modules-sb-test:
+    needs: front-yarn-install
+    runs-on: ci-4-cores
+    env:
+      REACT_APP_SERVER_BASE_URL: http://localhost:3000
+    steps:
+      - name: Cancel Previous Runs
+        uses: styfle/cancel-workflow-action@0.11.0
+        with:
+            access_token: ${{ github.token }}
+      - uses: actions/checkout@v4
+      - name: Setup Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: "18"
+      - name: Front / Write .env
         run: |
-          cd front && yarn test
+          cd packages/twenty-front
+          cp .env.example .env
+      - name: Cache front node modules
+        uses: actions/cache@v3
+        with:
+          path: packages/twenty-front/node_modules
+          key: front-node_modules-${{hashFiles('yarn.lock')}}
+          restore-keys: front-node_modules-
+      - name: Cache root node modules
+        uses: actions/cache@v3
+        with:
+          path: node_modules
+          key: root-node_modules-${{hashFiles('yarn.lock')}}
+          restore-keys: root-node_modules-
+      - name: Install Playwright
+        run: cd packages/twenty-front && npx playwright install
+      - name: Build Storybook
+        run: yarn nx storybook:modules:build --quiet twenty-front
+      - name: Run storybook tests
+        run: |
+          cd packages/twenty-front && npx concurrently -k -s first -n "SB,TEST" -c "magenta,blue" \
+            "npx http-server storybook-static --silent --port 6006" \
+            "yarn storybook:modules:coverage"
+  front-lint-tsc:
+    needs: front-yarn-install
+    runs-on: ubuntu-latest
+    env:
+      REACT_APP_SERVER_BASE_URL: http://localhost:3000
+    steps:
+      - name: Cancel Previous Runs
+        uses: styfle/cancel-workflow-action@0.11.0
+        with:
+            access_token: ${{ github.token }}
+      - uses: actions/checkout@v4
+      - name: Setup Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: "18"
+      - name: Cache front node modules
+        uses: actions/cache@v3
+        with:
+          path: packages/twenty-front/node_modules
+          key: front-node_modules-${{hashFiles('yarn.lock')}}
+          restore-keys: front-node_modules-
+      - name: Cache root node modules
+        uses: actions/cache@v3
+        with:
+          path: node_modules
+          key: root-node_modules-${{hashFiles('yarn.lock')}}
+          restore-keys: root-node_modules-
+      - name: Front / Run linter
+        run: yarn nx lint:ci twenty-front
+      - name: Front / Run Typescript Check
+        run: yarn nx tsc:ci twenty-front
+  front-jest:
+    needs: front-yarn-install
+    runs-on: ubuntu-latest
+    env:
+      REACT_APP_SERVER_BASE_URL: http://localhost:3000
+    steps:
+      - name: Cancel Previous Runs
+        uses: styfle/cancel-workflow-action@0.11.0
+        with:
+            access_token: ${{ github.token }}
+      - uses: actions/checkout@v4
+      - name: Setup Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: "18"
+      - name: Cache front node modules
+        uses: actions/cache@v3
+        with:
+          path: packages/twenty-front/node_modules
+          key: front-node_modules-${{hashFiles('yarn.lock')}}
+          restore-keys: front-node_modules-
+      - name: Cache root node modules
+        uses: actions/cache@v3
+        with:
+          path: node_modules
+          key: root-node_modules-${{hashFiles('yarn.lock')}}
+          restore-keys: root-node_modules-
+      - name: Front / Run jest
+        run: yarn nx test twenty-front
