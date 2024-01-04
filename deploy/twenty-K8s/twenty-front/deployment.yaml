@@ -31,7 +31,7 @@ spec:
             containerPort: 3000 
           env:
             - name: REACT_APP_SERVER_BASE_URL
-              value: http://twenty-front-service:3000
+              value: "http://twenty-front-service:3000"
           livenessProbe:
             httpGet:
               path: /
