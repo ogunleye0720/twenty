@@ -1,0 +1,86 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: twenty-postgres 
+  namespace: twenty
+  labels:
+    app: twenty-postgres 
+spec:
+  selector:
+    matchLabels:
+      app: twenty-postgres
+  replicas: 3
+  strategy:
+    rollingUpdate:
+      maxSurge: 30%
+      maxUnavailable: 30%
+    type: RollingUpdate
+  template:
+    metadata:
+      labels:
+        app: twenty-postgres 
+    spec:
+      ServiceAccountName: twenty 
+      containers:
+      - name: twenty-postgres
+        image: twentycrm/twenty-postgres:latest
+        imagePullPolicy: IfNotPresent
+        resources:
+          requests:
+            cpu: "200m"
+            memory: "250Mi" 
+          limits:
+            cpu: "250m"
+            memory: "300Mi"
+        ports:
+        - name: postgres-port 
+          protocol: TCP
+          containerPort: 5432 
+        livenessProbe:
+          exec:
+            command:
+            - /bin/sh
+            - -c 
+            - exec ["/usr/bin/pg_isready", "-U", "$(POSTGRES_USER)", "-d", "$(POSTGRES_DB)"]
+          initialDelaySeconds: 30
+          timeoutSeconds: 5
+          successThreshold: 1
+          failureThreshold: 3
+          periodSeconds: 10
+        readinessProbe:
+          exec:
+            command:
+            - /bin/sh
+            - -c
+            - exec["/usr/bin/pg_isready", "-U", "$(POSTGRES_USER)", "-d", "$(POSTGRES_DB)"]
+          initialDelaySeconds: 30
+          timeoutSeconds: 5
+          successThreshold: 1
+          failureThreshold: 3
+          periodSeconds: 10
+        env:
+        - name: POSTGRES_USER 
+          valueFrom:
+            secretKeyRef:
+              name: twenty-credentials
+              key: POSTGRES_USER
+        - name: POSTGRES_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: twenty-credentials
+              key: POSTGRES_PASSWORD
+        - name: POSTGRES_DB
+          valueFrom:
+            secretKeyRef:
+              name: twenty-credentials
+              key: POSTGRES_DB 
+        volumeMounts:
+        - name: postgres-storage 
+          mountPath: /var/lib/postgresql/data
+      volumes:
+        - name: postgres-storage
+          hostPath:
+            path: /mnt/data
+            type: DirectoryOrCreate 
+      restartPolicy: Always
+---

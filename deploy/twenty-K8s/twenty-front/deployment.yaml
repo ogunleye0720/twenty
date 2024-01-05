@@ -10,6 +10,11 @@ spec:
   selector:
     matchLabels:
       app: twenty-front
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxSurge: 30%
+      maxUnavailable: 30%
   template: 
     metadata:
       labels:
@@ -43,6 +48,8 @@ spec:
             initialDelaySeconds: 300
             periodSeconds: 10
             timeoutSeconds: 5
+            successThreshold: 1
+            failureThreshold: 3
           readinessProbe:
             httpGet:
               path: /
@@ -50,8 +57,5 @@ spec:
             initialDelaySeconds: 30
             periodSeconds: 10
             timeoutSeconds: 5
-  strategy:
-    type: RollingUpdate
-    rollingUpdate:
-      maxSurge: 30%
-      maxUnavailable: 30%
+            successThreshold: 1
+            failureThreshold: 3
