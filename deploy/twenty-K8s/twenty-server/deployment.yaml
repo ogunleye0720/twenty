@@ -1,0 +1,63 @@
+apiVersion: apps/v1
+kind: Deployment 
+metadata: 
+  name: twenty-server-deployment
+  labels:
+    app: twenty-server  
+    namespace: twenty 
+spec:
+  replicas: 3
+  selector:
+    matchLabels:
+      app: twenty-server
+  template: 
+    metadata:
+      labels:
+        app: twenty-server
+    spec:
+      containers:
+        - name: twenty-server
+          image: twentycrm/twenty-server:latest
+          imagePullPolicy: IfNotPresent
+          resources:
+            requests:
+              memory: "250Mi"
+              cpu: "200m"
+            limits:
+              memory: "300Mi"
+              cpu: "250m" 
+          ports:
+          - name: twenty-server-port
+            containerPort: 3000 
+          env:
+            - name: FRONT_BASE_URL
+              value: "http://twenty-front-service:3001"
+            - name: PG_DATABASE_URL
+              value: "postgres://twenty:twenty@postgres-service:5432/default"
+            - name: SERVER_URL
+              value: "http://twenty-server-service:3000"
+            - name: PORT
+              value: "3000" 
+            - name: FRONT_AUTH_CALLBACK_URL
+              value: "http://twenty-front-service:3001/verify"
+            - name: GENERATE_SOURCEMAP
+              value: "false"
+          livenessProbe:
+            httpGet:
+              path: /
+              port: twenty-server-port
+            initialDelaySeconds: 300
+            periodSeconds: 10
+            timeoutSeconds: 5
+          readinessProbe:
+            httpGet:
+              path: /
+              port: twenty-server-port
+            initialDelaySeconds: 30
+            periodSeconds: 10
+            timeoutSeconds: 5
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxSurge: 30%
+      maxUnavailable: 30%
