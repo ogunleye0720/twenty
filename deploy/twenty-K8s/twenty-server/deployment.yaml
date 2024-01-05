@@ -32,8 +32,8 @@ spec:
           env:
             - name: FRONT_BASE_URL
               value: "http://twenty-front-service:3001"
-            - name: PG_DATABASE_URL
-              value: "postgres://twenty:twenty@postgres-service:5432/default"
+            - name: SIGN_IN_PREFILLED
+              value: "true"
             - name: SERVER_URL
               value: "http://twenty-server-service:3000"
             - name: PORT
