@@ -76,10 +76,14 @@ spec:
         volumeMounts:
         - name: postgres-storage 
           mountPath: /var/lib/postgresql/data
-      volumes:
-        - name: postgres-storage
-          hostPath:
-            path: /mnt/data
-            type: DirectoryOrCreate 
+      volumeClaimTemplates:
+      - metadata:
+          name: postgres-storage
+        spec:
+          accessModes: [ "ReadWriteOnce" ]
+          storageClassName: "postgres-storage"
+          resources:
+            requests:
+              storage: 1Gi
       restartPolicy: Always
 ---
