@@ -1,15 +1,13 @@
 apiVersion: apps/v1
-kind: Deployment
+kind: StatefulSet
 metadata:
   name: twenty-postgres 
   namespace: twenty
-  labels:
-    app: twenty-postgres 
 spec:
   selector:
     matchLabels:
       app: twenty-postgres
-  replicas: 3
+  replicas: 1
   strategy:
     rollingUpdate:
       maxSurge: 30%
@@ -21,6 +19,7 @@ spec:
         app: twenty-postgres 
     spec:
       ServiceAccountName: twenty 
+      terminationGracePeriodSeconds: 10
       containers:
       - name: twenty-postgres
         image: twentycrm/twenty-postgres:latest
