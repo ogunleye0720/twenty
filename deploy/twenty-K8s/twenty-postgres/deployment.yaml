@@ -4,6 +4,7 @@ metadata:
   name: twenty-postgres 
   namespace: twenty
 spec:
+  serviceName: "postgres-db"
   selector:
     matchLabels:
       app: twenty-postgres
@@ -76,14 +77,15 @@ spec:
         volumeMounts:
         - name: postgres-storage 
           mountPath: /var/lib/postgresql/data
-      volumeClaimTemplates:
-      - metadata:
-          name: postgres-storage
-        spec:
-          accessModes: [ "ReadWriteOnce" ]
-          storageClassName: "postgres-storage"
-          resources:
-            requests:
-              storage: 1Gi
-      restartPolicy: Always
+  volumeClaimTemplates:
+  - metadata:
+      name: postgres-storage
+    spec:
+      accessModes: [ "ReadWriteOnce" ]
+      storageClassName: "postgres-storage"
+      resources:
+        requests:
+          storage: 1Gi
+
 ---
+
